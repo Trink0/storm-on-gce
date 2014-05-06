@@ -20,7 +20,7 @@
 GCE_PROJECT=storm-simple
 GCE_ZONE=europe-west1-a
 MACHINE_TYPE=n1-highmem-2
-VM_IMAGE=projects/centos-cloud/global/images/centos-6-v20131120
+VM_IMAGE=projects/centos-cloud/global/images/centos-6-v20140415
 
 STORM_ZK_NODE=zk
 STORM_NIMBUS_NODE=nimbus
@@ -61,8 +61,8 @@ function setup_nimbus() {
   setup_node $STORM_NIMBUS_NODE $NIMBUS_SETUP_SCRIPT
   echo "Provisioning of Nimbus node done."
   sleep 3
-  gcutil --project=storm-simple addfirewall nimbus --description="Allow Nimbus" --allowed=":6627" --print_json
-  gcutil --project=storm-simple addfirewall nimbusui --description="Allow Nimbus UI" --allowed=":8080" --print_json
+  gcutil --project=$GCE_PROJECT addfirewall nimbus --description="Allow Nimbus" --allowed=":6627" --print_json
+  gcutil --project=$GCE_PROJECT addfirewall nimbusui --description="Allow Nimbus UI" --allowed=":8080" --print_json
   echo "Added firewalls for port 6627 and 8080."
   echo "Nimbus node ready."  
 }
@@ -81,7 +81,10 @@ echo "Launching Storm cluster with 1xZK, 1xNimbus and "${#STORM_SLAVE_NODES[@]}"
 
 ## todo: check if already deployed
 
-## todo: accept project ID as CLI parameter and default to GCE_PROJECT
+## accept project ID as CLI parameter and default to GCE_PROJECT
+if [ $# -eq 1 ]; then
+   GCE_PROJECT=$1
+fi
 
 setup_zk
 setup_nimbus
@@ -90,8 +93,8 @@ do
   setup_slave $slave
 done
 
-gcutil --project=storm-simple addfirewall supervisor1 --description="Allow Supervisor" --allowed=":6700" --print_json
-gcutil --project=storm-simple addfirewall supervisor2 --description="Allow Supervisor" --allowed=":6701" --print_json
+gcutil --project=$GCE_PROJECT addfirewall supervisor1 --description="Allow Supervisor" --allowed=":6700" --print_json
+gcutil --project=$GCE_PROJECT addfirewall supervisor2 --description="Allow Supervisor" --allowed=":6701" --print_json
 echo "Added firewalls for port 6700 and 6701."
 
 echo "Launch Storm cluster done at "`date`
